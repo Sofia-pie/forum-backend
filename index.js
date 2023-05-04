@@ -5,8 +5,9 @@ const app = express();
 require('dotenv').config();
 
 const mongoose = require('mongoose');
+
 mongoose
-  .connect(process.env.DB)
+  .connect(process.env.DB, { useNewUrlParser: true })
   .then(() => {
     console.log('Successfully connected to database');
   })
@@ -18,6 +19,12 @@ mongoose
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+const { userRoutes } = require('./routes/userRoutes');
+const { authRouter } = require('./routes/authRoutes');
+app.use(cors());
+app.use('/user', userRoutes);
+app.use('/auth', authRouter);
 
 const port = process.env.PORT || 8080;
 
