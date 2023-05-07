@@ -1,8 +1,9 @@
+const { Tag } = require('../models/Tag');
 const { Topic } = require('../models/Topic');
 
 const getAllTopics = (req, res) => {
   Topic.find()
-    .populate('comments')
+    // .populate('comments')
     .populate('tags')
     .then((topics) => {
       res.status(200).json(topics);
@@ -32,18 +33,32 @@ const getTopicById = (req, res) => {
 const createTopic = (req, res) => {
   const { title, content, tags } = req.body;
   const user_id = req.user._id;
+  Promise.all(
+    tags.map((tagName) => {
+      return Tag.findOne({ name: tagName }).then((tag) => {
+        if (!tag) {
+          tag = new Tag({ name: tagName });
+          return tag.save();
+        } else {
+          return tag;
+        }
+      });
+    })
+  )
+    .then((tagDocs) => {
+      const tagIds = tagDocs.map((tag) => tag._id);
 
-  const topic = new Topic({
-    title,
-    content,
-    tags,
-    upvotes: 0,
-    user_id,
-    comments: [],
-  });
+      const topic = new Topic({
+        title,
+        content,
+        tags: tagIds,
+        upvotes: 0,
+        user_id,
+        comments: [],
+      });
 
-  topic
-    .save()
+      return topic.save().populate('tags');
+    })
     .then((result) => {
       res.status(201).json(result);
     })
@@ -55,7 +70,7 @@ const createTopic = (req, res) => {
 const updateTopic = (req, res) => {
   const { id } = req.params;
 
-  const { title, content, tags, upvotes } = req.body;
+  const { title, content, tags } = req.body;
 
   Topic.findByIdAndUpdate(id, { title, content, tags, upvote }, { new: true })
     .then((topic) => {

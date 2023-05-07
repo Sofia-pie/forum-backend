@@ -9,13 +9,11 @@ const {
 } = require('../controllers/topicController');
 const router = express.Router();
 
-router.use(authMiddleware);
-
 router.get('/', getAllTopics);
 router.get('/:id', getTopicById);
-router.post('/', createTopic);
-router.put('/:id', updateTopic);
-router.delete('/:id', deleteTopic);
+router.post('/', authMiddleware, createTopic);
+router.put('/:id', authMiddleware, updateTopic);
+router.delete('/:id', authMiddleware, deleteTopic);
 
 module.exports = {
   topicsRouter: router,
