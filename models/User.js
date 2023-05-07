@@ -6,7 +6,6 @@ const userSchema = new Schema(
   {
     firstName: {
       type: String,
-      required: true,
     },
     lastName: {
       type: String,
@@ -25,6 +24,9 @@ const userSchema = new Schema(
     },
     bio: {
       type: String,
+    },
+    isAdmin: {
+      type: Boolean,
     },
     profilePicture: { type: String },
   },

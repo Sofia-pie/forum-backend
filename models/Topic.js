@@ -14,12 +14,19 @@ const topicSchema = new Schema(
     },
     tags: [
       {
-        type: String,
+        type: Schema.Types.ObjectId,
+        ref: 'Tag',
       },
     ],
     upvotes: {
       type: Number,
     },
+    comments: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Comment',
+      },
+    ],
   },
   { timestamps: { createdAt: 'created_date', updatedAt: false } }
 );

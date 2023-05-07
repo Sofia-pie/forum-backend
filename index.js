@@ -20,11 +20,13 @@ mongoose
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-const { userRoutes } = require('./routes/userRoutes');
+const { userRouter } = require('./routes/userRoutes');
 const { authRouter } = require('./routes/authRoutes');
+const { topicsRouter } = require('./routes/topicRoutes');
 app.use(cors());
-app.use('/user', userRoutes);
+app.use('/user', userRouter);
 app.use('/auth', authRouter);
+app.use('/topics', topicsRouter);
 
 const port = process.env.PORT || 8080;
 

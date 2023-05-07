@@ -32,5 +32,5 @@ router.put('/', upload.single('profilePicture'), authMiddleware, updateUser);
 router.delete('/', authMiddleware, deleteUser);
 
 module.exports = {
-  userRoutes: router,
+  userRouter: router,
 };
