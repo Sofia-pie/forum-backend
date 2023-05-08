@@ -24,12 +24,13 @@ const { userRouter } = require('./routes/userRoutes');
 const { authRouter } = require('./routes/authRoutes');
 const { topicsRouter } = require('./routes/topicRoutes');
 const { tagsRouter } = require('./routes/tagsRoutes');
+
 app.use(cors());
 
 app.use('/user', userRouter);
 app.use('/auth', authRouter);
-app.use('/topics', topicsRouter);
 app.use('/tags', tagsRouter);
+app.use('/topics', topicsRouter);
 
 const port = process.env.PORT || 8080;
 

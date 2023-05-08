@@ -3,8 +3,12 @@ const { Topic } = require('../models/Topic');
 
 const getAllTopics = (req, res) => {
   Topic.find()
-    // .populate('comments')
+    .populate({
+      path: 'comments',
+      populate: { path: 'user', select: 'username' },
+    })
     .populate('tags')
+    .populate({ path: 'user', select: 'username' })
     .then((topics) => {
       res.status(200).json(topics);
     })

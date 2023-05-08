@@ -4,7 +4,7 @@ const { Schema } = mongoose;
 
 const commentSchema = new Schema(
   {
-    user_id: { type: Schema.Types.ObjectId, ref: 'User' },
+    user: { type: Schema.Types.ObjectId, ref: 'User' },
     topic_id: { type: Schema.Types.ObjectId, ref: 'Topic' },
     text: {
       type: String,
@@ -12,9 +12,10 @@ const commentSchema = new Schema(
     },
     upvotes: {
       type: Number,
+      default: 0,
     },
   },
-  { timestamps: { createdAt: true, updatedAt: false } }
+  { timestamps: { createdAt: 'created_date', updatedAt: false } }
 );
 
 const Comment = mongoose.model('Comment', commentSchema);
