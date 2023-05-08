@@ -1,6 +1,7 @@
 const { User } = require('../models/User');
 const multer = require('multer');
 const path = require('path');
+const { Topic } = require('../models/Topic');
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -16,7 +17,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-getUsers = async (req, res) => {
+const getUsers = async (req, res) => {
   try {
     const users = await User.find();
     res.json(users);
@@ -26,7 +27,7 @@ getUsers = async (req, res) => {
   }
 };
 
-getUser = async (req, res) => {
+const getUser = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
     if (!user) {
@@ -39,7 +40,7 @@ getUser = async (req, res) => {
   }
 };
 
-updateUser = async (req, res) => {
+const updateUser = async (req, res) => {
   try {
     const user = await User.findByIdAndUpdate(req.user._id, req.body, {
       new: true,
@@ -54,7 +55,25 @@ updateUser = async (req, res) => {
   }
 };
 
-deleteUser = async (req, res) => {
+const getUserTopics = async (req, res) => {
+  const userId = req.params.id;
+
+  try {
+    const topics = await Topic.find({ user: userId })
+      .populate('tags')
+      .populate('user')
+      .populate({
+        path: 'comments',
+        populate: { path: 'user', select: 'username' },
+      });
+
+    res.status(200).json(topics);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+const deleteUser = async (req, res) => {
   try {
     const user = await User.findByIdAndDelete(req.user._sid);
     if (!user) {
@@ -70,7 +89,7 @@ deleteUser = async (req, res) => {
 module.exports = {
   getUsers,
   getUser,
-
+  getUserTopics,
   updateUser,
   deleteUser,
 };

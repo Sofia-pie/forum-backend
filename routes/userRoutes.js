@@ -5,6 +5,7 @@ const {
   getUser,
   updateUser,
   deleteUser,
+  getUserTopics,
 } = require('../controllers/userController');
 const { authMiddleware } = require('../middleware/authMiddleware');
 
@@ -22,14 +23,13 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// Get a user by ID
-router.get('/:id', authMiddleware, getUser);
-
-// Update a user with profile picture
 router.put('/', upload.single('profilePicture'), authMiddleware, updateUser);
 
-// Delete a user
 router.delete('/', authMiddleware, deleteUser);
+
+router.get('/:id', authMiddleware, getUser);
+
+router.get('/:id/topics', authMiddleware, getUserTopics);
 
 module.exports = {
   userRouter: router,
