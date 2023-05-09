@@ -27,12 +27,8 @@ const registerUser = async (req, res, next) => {
   });
   // create new user
   await user.save();
-  const payload = {
-    user_id: user._id,
-    username: user.username,
-  };
-  const jwtToken = jwt.sign(payload, token);
-  return res.json({ jwt_token: jwtToken, _id: user._id });
+
+  return res.json({ message: 'User created' });
 };
 
 const loginUser = async (req, res, next) => {

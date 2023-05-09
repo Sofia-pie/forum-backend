@@ -39,7 +39,7 @@ const updateComment = (req, res) => {
     { text, upvotes },
     { new: true }
   )
-    .populate('user topic_id')
+    .populate('user_id topic_id')
     .then((comment) => {
       if (!comment) {
         throw new Error('Comment not found');

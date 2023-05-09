@@ -7,7 +7,7 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 
 mongoose
-  .connect(process.env.DB, { useNewUrlParser: true })
+  .connect(process.env.DB)
   .then(() => {
     console.log('Successfully connected to database');
   })
@@ -26,7 +26,7 @@ const { topicsRouter } = require('./routes/topicRoutes');
 const { tagsRouter } = require('./routes/tagsRoutes');
 
 app.use(cors());
-
+app.use('/uploads', express.static('public'));
 app.use('/user', userRouter);
 app.use('/auth', authRouter);
 app.use('/tags', tagsRouter);

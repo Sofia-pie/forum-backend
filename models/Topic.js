@@ -4,7 +4,7 @@ const { Schema } = mongoose;
 
 const topicSchema = new Schema(
   {
-    user: { type: Schema.Types.ObjectId, ref: 'User' },
+    user_id: { type: Schema.Types.ObjectId, ref: 'User' },
     title: {
       type: String,
       required: true,

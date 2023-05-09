@@ -5,10 +5,10 @@ const getAllTopics = (req, res) => {
   Topic.find()
     .populate({
       path: 'comments',
-      populate: { path: 'user', select: 'username' },
+      populate: { path: 'user_id', select: 'username' },
     })
     .populate('tags')
-    .populate({ path: 'user', select: 'username' })
+    .populate({ path: 'user_id', select: 'username' })
     .then((topics) => {
       res.status(200).json(topics);
     })
