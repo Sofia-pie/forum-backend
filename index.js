@@ -26,12 +26,13 @@ const { topicsRouter } = require('./routes/topicRoutes');
 const { tagsRouter } = require('./routes/tagsRoutes');
 
 app.use(cors());
-app.use('/uploads', express.static('public'));
+
 app.use('/user', userRouter);
 app.use('/auth', authRouter);
 app.use('/tags', tagsRouter);
 app.use('/topics', topicsRouter);
 
+app.use('/uploads', express.static('uploads'));
 const port = process.env.PORT || 8080;
 
 const start = async () => {

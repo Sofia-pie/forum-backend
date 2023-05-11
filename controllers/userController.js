@@ -19,7 +19,8 @@ const getUser = async (req, res) => {
     if (!user) {
       return res.status(404).send('User not found');
     }
-    res.json(user);
+    const url = `${req.protocol}://${req.get('host')}\\`;
+    res.json({...user,profilePicture: url+user.profilePicture});
   } catch (err) {
     console.error(err);
     res.status(500).send('Internal server error');

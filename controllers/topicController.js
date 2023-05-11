@@ -7,8 +7,8 @@ const getAllTopics = (req, res) => {
       path: 'comments',
       populate: { path: 'user_id', select: 'username' },
     })
-    .populate('tags')
-    .populate({ path: 'user_id', select: 'username' })
+    .populate({ path: 'tags', select: 'name' })
+    .populate({ path: 'user_id', select: 'username profilePicture' })
     .then((topics) => {
       res.status(200).json(topics);
     })
@@ -61,7 +61,7 @@ const createTopic = (req, res) => {
         comments: [],
       });
 
-      return topic.save().populate('tags');
+      return topic.save();
     })
     .then((result) => {
       res.status(201).json(result);
@@ -89,6 +89,71 @@ const updateTopic = (req, res) => {
     });
 };
 
+const upvoteTopic = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const topicId = req.params.id;
+    const action = req.body.action;
+    const topic = await Topic.findById(topicId);
+    if (action === 'add') {
+      if (topic.upvoters.includes(userId)) {
+        return res.json({ message: 'already upvoted' });
+      } else if (topic.downvoters.includes(userId)) {
+        topic.downvoters.pull(userId);
+      }
+      topic.downvoters.push(userId);
+      topic.upvotes = topic.upvoters.length - topic.downvoters.length;
+      await topic.save();
+    } else if (action === 'remove') {
+      if (!topic.upvoters.includes(userId)) {
+        return res
+          .status(400)
+          .json({ error: 'User has not upvoted this topic' });
+      }
+      const upvoterIndex = topic.upvoters.indexOf(userId);
+      topic.upvoters.splice(upvoterIndex, 1);
+      await topic.save();
+    }
+    res.json(topic);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+const downvoteTopic = async (req, res) => {
+  const topicId = req.params.id;
+  const userId = req.user._id;
+  const action = req.body.action;
+  try {
+    const topic = await Topic.findById(topicId);
+    if (action === 'add') {
+      if (topic.downvoters.includes(userId)) {
+        return res
+          .status(400)
+          .json({ error: 'User has already downvoted this topic' });
+      } else if (topic.upvoters.includes(userId)) {
+        topic.upvoters.pull(userId);
+      }
+      topic.downvoters.push(userId);
+      topic.upvotes = topic.upvoters.length - topic.downvoters.length;
+      await topic.save();
+    } else if (action === 'remove') {
+      if (!topic.downvoters.includes(userId)) {
+        return res
+          .status(400)
+          .json({ error: 'User has not upvoted this topic' });
+      }
+      const downvoterIndex = topic.downvoters.indexOf(userId);
+      topic.downvoters.splice(downvoterIndex, 1);
+      topic.upvotes = topic.upvoters.length - topic.downvoters.length;
+      await topic.save();
+    }
+    res.json(topic);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
 const deleteTopic = (req, res) => {
   const { id } = req.params;
 
@@ -109,6 +174,8 @@ module.exports = {
   getAllTopics,
   getTopicById,
   createTopic,
+  upvoteTopic,
+  downvoteTopic,
   updateTopic,
   deleteTopic,
 };

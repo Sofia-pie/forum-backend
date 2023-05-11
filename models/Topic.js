@@ -27,6 +27,14 @@ const topicSchema = new Schema(
         ref: 'Comment',
       },
     ],
+    upvoters: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    }],
+    downvoters: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    }]
   },
   { timestamps: { createdAt: 'created_date', updatedAt: false } }
 );
