@@ -3,8 +3,7 @@ const router = express.Router();
 const path = require('path');
 const multer = require('multer');
 
-
-const upload = multer({ dest: 'uploads/' })
+const upload = multer({ dest: 'uploads' });
 
 const { registerUser, loginUser } = require('../controllers/authController');
 

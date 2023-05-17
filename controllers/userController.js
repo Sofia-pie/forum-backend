@@ -1,7 +1,7 @@
 const { User } = require('../models/User');
-const multer = require('multer');
-const path = require('path');
+
 const { Topic } = require('../models/Topic');
+const { Comment } = require('../models/Comment');
 
 const getUsers = async (req, res) => {
   try {
@@ -15,12 +15,12 @@ const getUsers = async (req, res) => {
 
 const getUser = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
+    const user = await User.findById(req.params.id);
     if (!user) {
       return res.status(404).send('User not found');
     }
-    const url = `${req.protocol}://${req.get('host')}\\`;
-    res.json({...user,profilePicture: url+user.profilePicture});
+
+    res.json(user);
   } catch (err) {
     console.error(err);
     res.status(500).send('Internal server error');
@@ -29,9 +29,17 @@ const getUser = async (req, res) => {
 
 const updateUser = async (req, res) => {
   try {
-    const user = await User.findByIdAndUpdate(req.user._id, req.body, {
-      new: true,
-    });
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      {
+        ...req.body,
+        profilePicture: req.file ? req.file.path : user.profilePicture,
+      },
+      {
+        new: true,
+      }
+    );
+    console.log(user);
     if (!user) {
       return res.status(404).send('User not found');
     }
@@ -44,9 +52,8 @@ const updateUser = async (req, res) => {
 
 const getUserTopics = async (req, res) => {
   const userId = req.params.id;
-
   try {
-    const topics = await Topic.find({ user: userId })
+    const topics = await Topic.find({ user_id: userId })
       .populate('tags')
       .populate('user_id')
       .populate({
@@ -64,9 +71,9 @@ const getUserComments = async (req, res) => {
   const userId = req.params.id;
 
   try {
-    const comments = await Comment.find({ user_id: userId })
-      .populate('topic_id')
-      .populate('user_id');
+    const comments = await Comment.find({ user_id: userId }).populate(
+      'user_id'
+    );
 
     res.status(200).json(comments);
   } catch (err) {

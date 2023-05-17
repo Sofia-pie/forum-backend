@@ -18,11 +18,17 @@ const createComment = (req, res) => {
         topic_id,
       });
       topic.comments.push(comment._id);
-
       return Promise.all([comment.save(), topic.save()]);
     })
     .then(([comment]) => {
-      res.status(201).json(comment);
+      comment
+        .populate({
+          path: 'user_id',
+          select: 'username profilePicture',
+        })
+        .then((populatedComment) => {
+          res.status(201).json(populatedComment);
+        });
     })
     .catch((err) => {
       res.status(500).json({ error: err.message });
@@ -39,7 +45,7 @@ const updateComment = (req, res) => {
     { text, upvotes },
     { new: true }
   )
-    .populate('user_id topic_id')
+    .populate({ path: 'user_id', select: 'username profilePicture' })
     .then((comment) => {
       if (!comment) {
         throw new Error('Comment not found');

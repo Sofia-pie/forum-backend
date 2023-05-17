@@ -16,10 +16,10 @@ const {
 const router = express.Router();
 
 router.get('/', getAllTopics);
-router.get('/:id', getTopicById);
+
 router.post('/', authMiddleware, createTopic);
-router.post('/:id/upvote', authMiddleware, upvoteTopic);
-router.post('/:id/downvote', authMiddleware, downvoteTopic);
+router.get('/:id', getTopicById);
+
 router.put('/:id', authMiddleware, updateTopic);
 router.delete('/:id', authMiddleware, deleteTopic);
 

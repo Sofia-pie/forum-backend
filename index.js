@@ -4,6 +4,8 @@ const cors = require('cors');
 const app = express();
 require('dotenv').config();
 
+const path = require('path');
+
 const mongoose = require('mongoose');
 
 mongoose
@@ -24,6 +26,7 @@ const { userRouter } = require('./routes/userRoutes');
 const { authRouter } = require('./routes/authRoutes');
 const { topicsRouter } = require('./routes/topicRoutes');
 const { tagsRouter } = require('./routes/tagsRoutes');
+const { upvoteRouter } = require('./routes/upvoteRoutes');
 
 app.use(cors());
 
@@ -31,8 +34,10 @@ app.use('/user', userRouter);
 app.use('/auth', authRouter);
 app.use('/tags', tagsRouter);
 app.use('/topics', topicsRouter);
+app.use('/', upvoteRouter);
 
-app.use('/uploads', express.static('uploads'));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 const port = process.env.PORT || 8080;
 
 const start = async () => {

@@ -20,8 +20,12 @@ const getAllTopics = (req, res) => {
 const getTopicById = (req, res) => {
   const { id } = req.params;
   Topic.findById(id)
-    .populate('comments')
-    .populate('tags')
+    .populate({
+      path: 'comments',
+      populate: { path: 'user_id', select: 'username profilePicture' },
+    })
+    .populate({ path: 'tags', select: 'name' })
+    .populate({ path: 'user_id', select: 'username profilePicture' })
     .then((topic) => {
       if (topic) {
         res.status(200).json(topic);
@@ -93,15 +97,15 @@ const upvoteTopic = async (req, res) => {
   try {
     const userId = req.user._id;
     const topicId = req.params.id;
-    const action = req.body.action;
+    const { action } = req.body;
     const topic = await Topic.findById(topicId);
     if (action === 'add') {
       if (topic.upvoters.includes(userId)) {
-        return res.json({ message: 'already upvoted' });
+        return res.status(400).json({ message: 'already upvoted' });
       } else if (topic.downvoters.includes(userId)) {
         topic.downvoters.pull(userId);
       }
-      topic.downvoters.push(userId);
+      topic.upvoters.push(userId);
       topic.upvotes = topic.upvoters.length - topic.downvoters.length;
       await topic.save();
     } else if (action === 'remove') {
@@ -112,9 +116,10 @@ const upvoteTopic = async (req, res) => {
       }
       const upvoterIndex = topic.upvoters.indexOf(userId);
       topic.upvoters.splice(upvoterIndex, 1);
+      topic.upvotes = topic.upvoters.length - topic.downvoters.length;
       await topic.save();
     }
-    res.json(topic);
+    res.status(200).json(topic);
   } catch (err) {
     res.status(500).json({ error: 'Server error' });
   }
@@ -123,9 +128,10 @@ const upvoteTopic = async (req, res) => {
 const downvoteTopic = async (req, res) => {
   const topicId = req.params.id;
   const userId = req.user._id;
-  const action = req.body.action;
+  const { action } = req.body;
   try {
     const topic = await Topic.findById(topicId);
+    console.log(action);
     if (action === 'add') {
       if (topic.downvoters.includes(userId)) {
         return res
@@ -135,13 +141,14 @@ const downvoteTopic = async (req, res) => {
         topic.upvoters.pull(userId);
       }
       topic.downvoters.push(userId);
+      console.log(topic.downvoters);
       topic.upvotes = topic.upvoters.length - topic.downvoters.length;
       await topic.save();
     } else if (action === 'remove') {
       if (!topic.downvoters.includes(userId)) {
         return res
           .status(400)
-          .json({ error: 'User has not upvoted this topic' });
+          .json({ error: 'User has not downvoted this topic' });
       }
       const downvoterIndex = topic.downvoters.indexOf(userId);
       topic.downvoters.splice(downvoterIndex, 1);
@@ -174,8 +181,6 @@ module.exports = {
   getAllTopics,
   getTopicById,
   createTopic,
-  upvoteTopic,
-  downvoteTopic,
   updateTopic,
   deleteTopic,
 };
