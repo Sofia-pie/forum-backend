@@ -27,6 +27,7 @@ const { authRouter } = require('./routes/authRoutes');
 const { topicsRouter } = require('./routes/topicRoutes');
 const { tagsRouter } = require('./routes/tagsRoutes');
 const { upvoteRouter } = require('./routes/upvoteRoutes');
+const { commentsRouter } = require('./routes/commentRoutes');
 
 app.use(cors());
 
@@ -34,6 +35,7 @@ app.use('/user', userRouter);
 app.use('/auth', authRouter);
 app.use('/tags', tagsRouter);
 app.use('/topics', topicsRouter);
+app.use('/comments', commentsRouter);
 app.use('/', upvoteRouter);
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

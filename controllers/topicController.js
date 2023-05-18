@@ -1,3 +1,4 @@
+const { Comment } = require('../models/Comment');
 const { Tag } = require('../models/Tag');
 const { Topic } = require('../models/Topic');
 
@@ -80,94 +81,30 @@ const updateTopic = (req, res) => {
 
   const { title, content, tags } = req.body;
 
-  Topic.findByIdAndUpdate(id, { title, content, tags, upvote }, { new: true })
+  Promise.all(
+    tags.map((tagName) => {
+      return Tag.findOne({ name: tagName }).then((tag) => {
+        if (!tag) {
+          tag = new Tag({ name: tagName });
+          return tag.save();
+        } else {
+          return tag;
+        }
+      });
+    })
+  )
+    .then((tagDocs) => {
+      const tagIds = tagDocs.map((tag) => tag._id);
+      return Topic.findByIdAndUpdate(
+        id,
+        { title, content, tags: tagIds },
+        { new: true }
+      );
+    })
     .then((topic) => {
+      console.log(topic);
       if (topic) {
         res.status(200).json(topic);
-      } else {
-        res.status(404).json({ message: 'ТNot found' });
-      }
-    })
-    .catch((err) => {
-      res.status(500).json({ error: err });
-    });
-};
-
-const upvoteTopic = async (req, res) => {
-  try {
-    const userId = req.user._id;
-    const topicId = req.params.id;
-    const { action } = req.body;
-    const topic = await Topic.findById(topicId);
-    if (action === 'add') {
-      if (topic.upvoters.includes(userId)) {
-        return res.status(400).json({ message: 'already upvoted' });
-      } else if (topic.downvoters.includes(userId)) {
-        topic.downvoters.pull(userId);
-      }
-      topic.upvoters.push(userId);
-      topic.upvotes = topic.upvoters.length - topic.downvoters.length;
-      await topic.save();
-    } else if (action === 'remove') {
-      if (!topic.upvoters.includes(userId)) {
-        return res
-          .status(400)
-          .json({ error: 'User has not upvoted this topic' });
-      }
-      const upvoterIndex = topic.upvoters.indexOf(userId);
-      topic.upvoters.splice(upvoterIndex, 1);
-      topic.upvotes = topic.upvoters.length - topic.downvoters.length;
-      await topic.save();
-    }
-    res.status(200).json(topic);
-  } catch (err) {
-    res.status(500).json({ error: 'Server error' });
-  }
-};
-
-const downvoteTopic = async (req, res) => {
-  const topicId = req.params.id;
-  const userId = req.user._id;
-  const { action } = req.body;
-  try {
-    const topic = await Topic.findById(topicId);
-    console.log(action);
-    if (action === 'add') {
-      if (topic.downvoters.includes(userId)) {
-        return res
-          .status(400)
-          .json({ error: 'User has already downvoted this topic' });
-      } else if (topic.upvoters.includes(userId)) {
-        topic.upvoters.pull(userId);
-      }
-      topic.downvoters.push(userId);
-      console.log(topic.downvoters);
-      topic.upvotes = topic.upvoters.length - topic.downvoters.length;
-      await topic.save();
-    } else if (action === 'remove') {
-      if (!topic.downvoters.includes(userId)) {
-        return res
-          .status(400)
-          .json({ error: 'User has not downvoted this topic' });
-      }
-      const downvoterIndex = topic.downvoters.indexOf(userId);
-      topic.downvoters.splice(downvoterIndex, 1);
-      topic.upvotes = topic.upvoters.length - topic.downvoters.length;
-      await topic.save();
-    }
-    res.json(topic);
-  } catch (err) {
-    res.status(500).json({ error: 'Server error' });
-  }
-};
-
-const deleteTopic = (req, res) => {
-  const { id } = req.params;
-
-  Topic.findByIdAndDelete(id)
-    .then((topic) => {
-      if (topic) {
-        res.status(200).json({ message: 'Deleted' });
       } else {
         res.status(404).json({ message: 'Not found' });
       }
@@ -175,6 +112,21 @@ const deleteTopic = (req, res) => {
     .catch((err) => {
       res.status(500).json({ error: err });
     });
+};
+
+const deleteTopic = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const topic = await Topic.findByIdAndDelete(id);
+    if (topic) {
+      await Comment.deleteMany({ topic: id });
+      res.status(200).json({ message: 'Deleted' });
+    } else {
+      res.status(404).json({ message: 'Not found' });
+    }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 };
 
 module.exports = {

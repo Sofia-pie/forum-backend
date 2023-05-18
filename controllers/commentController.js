@@ -57,7 +57,23 @@ const updateComment = (req, res) => {
     });
 };
 
+const deleteComment = (req, res) => {
+  const { id } = req.params;
+  Comment.findOneAndDelete({ _id: id, user_id: req.user._id })
+    .then((comment) => {
+      if (comment) {
+        res.status(200).json({ message: 'Deleted' });
+      } else {
+        res.status(404).json({ message: 'Not Found' });
+      }
+    })
+    .catch((err) => {
+      res.status(500).json({ message: 'Server error' });
+    });
+};
+
 module.exports = {
   createComment,
   updateComment,
+  deleteComment,
 };

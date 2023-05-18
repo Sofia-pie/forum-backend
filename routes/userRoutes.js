@@ -17,11 +17,11 @@ router.put('/', authMiddleware, upload.single('profilePicture'), updateUser);
 
 router.delete('/', authMiddleware, deleteUser);
 
-router.get('/:id', authMiddleware, getUser);
+router.get('/:id', getUser);
 
-router.get('/:id/topics', authMiddleware, getUserTopics);
+router.get('/:id/topics', getUserTopics);
 
-router.get('/:id/comments', authMiddleware, getUserComments);
+router.get('/:id/comments', getUserComments);
 
 module.exports = {
   userRouter: router,

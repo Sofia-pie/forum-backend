@@ -6,8 +6,6 @@ const {
   createTopic,
   updateTopic,
   deleteTopic,
-  upvoteTopic,
-  downvoteTopic,
 } = require('../controllers/topicController');
 const {
   createComment,
