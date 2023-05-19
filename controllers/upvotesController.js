@@ -33,8 +33,10 @@ const upvoteItem = async (req, res) => {
     }
 
     res.status(200).json(item);
-  } catch (err) {
-    res.status(500).json({ error: 'Server error' });
+  } catch (error) {
+    const err = new Error(error.message);
+    err.statusCode = 500;
+    return next(err);
   }
 };
 
@@ -71,8 +73,10 @@ const downvoteItem = async (req, res) => {
       await item.save();
     }
     res.json(item);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+  } catch (error) {
+    const err = new Error(error.message);
+    err.statusCode = 500;
+    return next(err);
   }
 };
 

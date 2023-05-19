@@ -52,9 +52,12 @@ const start = async () => {
 
 start();
 
-function errorHandler(err, req, res, next) {
-  res.status(500).json(err.message);
-}
-
+const errorHandler = (err, req, res, next) => {
+  if (err.statusCode) {
+    res.status(err.statusCode).json({ error: err.message });
+  } else {
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
 // ERROR HANDLER
 app.use(errorHandler);

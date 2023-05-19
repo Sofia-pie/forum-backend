@@ -7,9 +7,10 @@ const getUsers = async (req, res) => {
   try {
     const users = await User.find();
     res.json(users);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Internal server error');
+  } catch (error) {
+    const err = new Error(error.message);
+    err.statusCode = 500;
+    return next(err);
   }
 };
 
@@ -17,13 +18,15 @@ const getUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) {
-      return res.status(404).send('User not found');
+      const err = new Error('User not found');
+      err.statusCode = 404;
+      return next(err);
     }
-
     res.json(user);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Internal server error');
+  } catch (error) {
+    const err = new Error(error.message);
+    err.statusCode = 500;
+    return next(err);
   }
 };
 
@@ -31,9 +34,10 @@ const updateUser = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
     if (!user) {
-      return res.status(404).send('User not found');
+      const err = new Error('User not found');
+      err.statusCode = 404;
+      return next(err);
     }
-
     const updatedUser = await User.findByIdAndUpdate(
       req.user._id,
       {
@@ -46,9 +50,10 @@ const updateUser = async (req, res) => {
     );
 
     res.json(updatedUser);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Internal server error');
+  } catch (error) {
+    const err = new Error(error.message);
+    err.statusCode = 500;
+    return next(err);
   }
 };
 
@@ -64,8 +69,10 @@ const getUserTopics = async (req, res) => {
       });
 
     res.status(200).json(topics);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+  } catch (error) {
+    const err = new Error(error.message);
+    err.statusCode = 500;
+    return next(err);
   }
 };
 
@@ -78,16 +85,21 @@ const getUserComments = async (req, res) => {
     );
 
     res.status(200).json(comments);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+  } catch (error) {
+    const err = new Error(error.message);
+    err.statusCode = 500;
+    return next(err);
   }
 };
+
 const deleteUser = async (req, res) => {
   try {
     const userId = req.user._id;
     const user = await User.findByIdAndDelete(req.user._id);
     if (!user) {
-      return res.status(404).send('User not found');
+      const err = new Error('Not found');
+      err.statusCode = 500;
+      return next(err);
     }
     await Topic.updateMany(
       { $or: [{ upvoters: userId }, { downvoters: userId }] },
@@ -101,9 +113,10 @@ const deleteUser = async (req, res) => {
 
     await Topic.updateMany({ user_id: userId }, { $unset: { user_id: 1 } });
     res.status(200).json({ message: 'Deleted' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Internal server error');
+  } catch (error) {
+    const err = new Error(error.message);
+    err.statusCode = 500;
+    return next(err);
   }
 };
 

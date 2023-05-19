@@ -22,8 +22,10 @@ const getTags = (req, res) => {
     .then((tags) => {
       res.status(200).json(tags);
     })
-    .catch((err) => {
-      res.status(500).json({ error: err });
+    .catch((error) => {
+      const err = new Error(error.message);
+      err.statusCode = 500;
+      return next(err);
     });
 };
 

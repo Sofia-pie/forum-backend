@@ -13,8 +13,10 @@ const getAllTopics = (req, res) => {
     .then((topics) => {
       res.status(200).json(topics);
     })
-    .catch((err) => {
-      res.status(500).json({ error: err });
+    .catch((error) => {
+      const err = new Error(error.message);
+      err.statusCode = 500;
+      return next(err);
     });
 };
 
@@ -31,11 +33,15 @@ const getTopicById = (req, res) => {
       if (topic) {
         res.status(200).json(topic);
       } else {
-        res.status(404).json({ message: 'Not found' });
+        const err = new Error('Not Found');
+        err.statusCode = 404;
+        return next(err);
       }
     })
-    .catch((err) => {
-      res.status(500).json({ error: err });
+    .catch((error) => {
+      const err = new Error(error.message);
+      err.statusCode = 500;
+      return next(err);
     });
 };
 
@@ -71,8 +77,10 @@ const createTopic = (req, res) => {
     .then((result) => {
       res.status(201).json(result);
     })
-    .catch((err) => {
-      res.status(500).json({ error: err });
+    .catch((error) => {
+      const err = new Error(error.message);
+      err.statusCode = 500;
+      return next(err);
     });
 };
 
@@ -104,13 +112,16 @@ const updateTopic = (req, res) => {
     .then((topic) => {
       console.log(topic);
       if (topic) {
-        res.status(200).json(topic);
-      } else {
-        res.status(404).json({ message: 'Not found' });
+        return res.status(200).json(topic);
       }
+      const err = new Error('Not Found');
+      err.statusCode = 404;
+      return next(err);
     })
-    .catch((err) => {
-      res.status(500).json({ error: err });
+    .catch((error) => {
+      const err = new Error(error.message);
+      err.statusCode = 500;
+      return next(err);
     });
 };
 
@@ -120,13 +131,40 @@ const deleteTopic = async (req, res) => {
     const topic = await Topic.findByIdAndDelete(id);
     if (topic) {
       await Comment.deleteMany({ topic: id });
-      res.status(200).json({ message: 'Deleted' });
-    } else {
-      res.status(404).json({ message: 'Not found' });
+      return res.status(200).json({ message: 'Deleted' });
     }
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    const err = new Error('Not Found');
+    err.statusCode = 404;
+    return next(err);
+  } catch (error) {
+    const err = new Error(error.message);
+    err.statusCode = 500;
+    return next(err);
   }
+};
+
+const getTopicsByTag = (req, res) => {
+  const { tagId } = req.params;
+  Tag.findById(tagId)
+    .then((tag) => {
+      if (tag) {
+        Topic.find({ tags: { $in: [tagId] } })
+          .populate({
+            path: 'comments',
+            populate: { path: 'user_id', select: 'username' },
+          })
+          .populate({ path: 'tags', select: 'name' })
+          .populate({ path: 'user_id', select: 'username profilePicture' })
+          .then((topics) => {
+            res.status(200).json(topics);
+          });
+      }
+    })
+    .catch((error) => {
+      const err = new Error(error.message);
+      err.statusCode = 500;
+      return next(err);
+    });
 };
 
 module.exports = {
@@ -135,4 +173,5 @@ module.exports = {
   createTopic,
   updateTopic,
   deleteTopic,
+  getTopicsByTag,
 };

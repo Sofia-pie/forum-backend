@@ -27,11 +27,13 @@ const createComment = (req, res) => {
           select: 'username profilePicture',
         })
         .then((populatedComment) => {
-          res.status(201).json(populatedComment);
+          return res.status(201).json(populatedComment);
         });
     })
-    .catch((err) => {
-      res.status(500).json({ error: err.message });
+    .catch((error) => {
+      const err = new Error(error.message);
+      err.statusCode = 500;
+      return next(err);
     });
 };
 
@@ -62,13 +64,14 @@ const deleteComment = (req, res) => {
   Comment.findOneAndDelete({ _id: id, user_id: req.user._id })
     .then((comment) => {
       if (comment) {
-        res.status(200).json({ message: 'Deleted' });
-      } else {
-        res.status(404).json({ message: 'Not Found' });
+        return res.status(200).json({ message: 'Deleted' });
       }
+      return res.status(404).json({ message: 'Not Found' });
     })
-    .catch((err) => {
-      res.status(500).json({ message: 'Server error' });
+    .catch((error) => {
+      const err = new Error(error.message);
+      err.statusCode = 500;
+      return next(err);
     });
 };
 

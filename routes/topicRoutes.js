@@ -6,6 +6,7 @@ const {
   createTopic,
   updateTopic,
   deleteTopic,
+  getTopicsByTag,
 } = require('../controllers/topicController');
 const {
   createComment,
@@ -16,6 +17,9 @@ const router = express.Router();
 router.get('/', getAllTopics);
 
 router.post('/', authMiddleware, createTopic);
+
+router.get('/tags/:tagId', getTopicsByTag);
+
 router.get('/:id', getTopicById);
 
 router.put('/:id', authMiddleware, updateTopic);
