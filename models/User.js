@@ -25,9 +25,6 @@ const userSchema = new Schema(
     bio: {
       type: String,
     },
-    isAdmin: {
-      type: Boolean,
-    },
     profilePicture: { type: String },
   },
   { timestamps: { createdAt: true, updatedAt: false } }
